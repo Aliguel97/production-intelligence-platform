@@ -345,9 +345,7 @@ Die Managementübersicht zeigt die wichtigsten Unternehmenskennzahlen auf einen 
 * Gewinn
 * Energieverbrauch
 
-### Dashboard Preview
 
-![Power BI Management Dashboard](images/dashboard_overview.png)
 
 ---
 
@@ -364,7 +362,6 @@ Analysiert werden unter anderem:
 * OEE
 * Störungsursachen
 
-![Power BI Production Dashboard](images/dashboard_production.png)
 
 ---
 
@@ -385,8 +382,6 @@ Schicht
    ↓
 Mögliche Ursache
 ```
-
-![Power BI Quality Dashboard](images/dashboard_quality.png)
 
 ---
 
