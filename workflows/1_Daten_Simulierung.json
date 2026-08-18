@@ -1,0 +1,308 @@
+{
+  "name": "1 Daten Simulierung",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2256,
+        -1600
+      ],
+      "id": "30b85d9c-d92a-413b-af5d-c95f3f737aaf",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT *\nFROM prod.sensorwerte\nORDER BY RANDOM()\nLIMIT 50;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -2000,
+        -1600
+      ],
+      "id": "bb96fa2d-0531-49a1-8c0e-ffe35717278d",
+      "name": "Sensorwerte lesen",
+      "credentials": {
+        "postgres": {
+          "id": "5eEyyLWscvqOxe7m",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "value": "prod",
+          "mode": "list",
+          "cachedResultName": "prod"
+        },
+        "table": {
+          "__rl": true,
+          "value": "sensorwerte",
+          "mode": "list",
+          "cachedResultName": "sensorwerte"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "produktionsauftrag_id": "={{$json.produktionsauftrag_id}}",
+            "maschinen_id": "={{$json.maschinen_id}}",
+            "temperatur_c": "={{$json.temperatur_c}}",
+            "druck_bar": "={{$json.druck_bar}}",
+            "vibration_mm": "={{$json.vibration_mm}}",
+            "stromaufnahme_a": "={{$json.stromaufnahme_a}}",
+            "drehzahl_rpm": "={{$json.drehzahl_rpm}}",
+            "ausfallrisiko": "={{$json.ausfallrisiko}}",
+            "zeitstempel": "={{$json.zeitstempel}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "sensorwert_id",
+              "displayName": "sensorwert_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "produktionsauftrag_id",
+              "displayName": "produktionsauftrag_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "maschinen_id",
+              "displayName": "maschinen_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "temperatur_c",
+              "displayName": "temperatur_c",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "druck_bar",
+              "displayName": "druck_bar",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "vibration_mm",
+              "displayName": "vibration_mm",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "stromaufnahme_a",
+              "displayName": "stromaufnahme_a",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "drehzahl_rpm",
+              "displayName": "drehzahl_rpm",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ausfallrisiko",
+              "displayName": "ausfallrisiko",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "zeitstempel",
+              "displayName": "zeitstempel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "bereinigungshinweis",
+              "displayName": "bereinigungshinweis",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "ausfallrisiko_klasse",
+              "displayName": "ausfallrisiko_klasse",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "temperatur_status",
+              "displayName": "temperatur_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "vibration_status",
+              "displayName": "vibration_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "fehlerhinweis",
+              "displayName": "fehlerhinweis",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1552,
+        -1600
+      ],
+      "id": "3557824f-82c1-4918-8492-98fcd5c79a3c",
+      "name": "Neue Daten in DB einpflegen",
+      "credentials": {
+        "postgres": {
+          "id": "5eEyyLWscvqOxe7m",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const output = [];\n\nfor (const item of $input.all()) {\n\n    let temperatur =\n        Number(item.json.temperatur_c) *\n        (0.97 + Math.random() * 0.03);\n\n    let vibration =\n        Number(item.json.vibration_mm) *\n        (0.97 + Math.random() * 0.03);\n\n    let druck =\n        Number(item.json.druck_bar) *\n        (0.98 + Math.random() * 0.03);\n\n    let strom =\n        Number(item.json.stromaufnahme_a) *\n        (0.97 + Math.random() * 0.03);\n\n    let drehzahl =\n        Number(item.json.drehzahl_rpm) *\n        (0.97 + Math.random() * 0.03);\n\n    let ausfallrisiko =\n        Number(item.json.ausfallrisiko) *\n        (0.97 + Math.random() * 0.03);\n\n    // Nur 0,5% kritische Ereignisse\n    if (Math.random() < 0.005) {\n\n        temperatur += 8 + Math.random() * 8;\n        vibration += 1 + Math.random() * 2;\n        strom += 20 + Math.random() * 40;\n        ausfallrisiko += 10 + Math.random() * 10;\n    }\n\n    // Risiko begrenzen\n    ausfallrisiko = Math.min(ausfallrisiko, 100);\n\n    output.push({\n        json: {\n\n            produktionsauftrag_id:\n                item.json.produktionsauftrag_id,\n\n            maschinen_id:\n                item.json.maschinen_id,\n\n            temperatur_c:\n                Number(temperatur.toFixed(2)),\n\n            druck_bar:\n                Number(druck.toFixed(2)),\n\n            vibration_mm:\n                Number(vibration.toFixed(2)),\n\n            stromaufnahme_a:\n                Number(strom.toFixed(2)),\n\n            drehzahl_rpm:\n                Math.round(drehzahl),\n\n            ausfallrisiko:\n                Number(ausfallrisiko.toFixed(2)),\n\n            zeitstempel:\n                new Date().toISOString(),\n\n            ausfallrisiko_klasse:\n                ausfallrisiko > 85\n                    ? 'Hoch'\n                    : ausfallrisiko > 60\n                    ? 'Mittel'\n                    : 'Niedrig',\n\n            temperatur_status:\n                temperatur > 95\n                    ? 'Erhöht'\n                    : 'Normal',\n\n            vibration_status:\n                vibration > 8\n                    ? 'Kritisch'\n                    : 'Normal'\n        }\n    });\n}\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1776,
+        -1600
+      ],
+      "id": "a4ba2756-6e60-41f0-a431-47c899e5e9f5",
+      "name": "Neue Sensorwerte Generieren"
+    },
+    {
+      "parameters": {
+        "content": "## Datengenerierung",
+        "height": 80
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1984,
+        -1712
+      ],
+      "typeVersion": 1,
+      "id": "c2f372ef-809c-496e-a368-18616227a243",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Sensorwerte lesen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sensorwerte lesen": {
+      "main": [
+        [
+          {
+            "node": "Neue Sensorwerte Generieren",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Neue Daten in DB einpflegen": {
+      "main": [
+        []
+      ]
+    },
+    "Neue Sensorwerte Generieren": {
+      "main": [
+        [
+          {
+            "node": "Neue Daten in DB einpflegen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "788c99a6-20f2-4057-aa60-1c8d9489cd8d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c4274ae40a4d79f47f6f6f69c27026a702cca340d2141e9b63b18db260f0078c"
+  },
+  "id": "WVz7UvA3KWFoBD7C",
+  "tags": []
+}

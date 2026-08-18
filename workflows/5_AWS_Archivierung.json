@@ -1,0 +1,103 @@
+{
+  "name": "5 AWS Archivierung",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1408,
+        -688
+      ],
+      "id": "86b4b9bd-1252-42cb-bb14-3d2d09921e68",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/home/node/.n8n-files/Production CSV/*.csv",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        -1120,
+        -688
+      ],
+      "id": "17cb8035-4cfd-4a80-b39c-3409c6e2bdc9",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "operation": "upload",
+        "bucketName": "produktionsdaten-bucket",
+        "fileName": "=RAW/{{ $binary.data.fileName }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.awsS3",
+      "typeVersion": 2,
+      "position": [
+        -912,
+        -688
+      ],
+      "id": "f2ac4571-bb11-4556-9707-da9a280fb6d7",
+      "name": "Upload a file",
+      "credentials": {
+        "aws": {
+          "id": "AnUtccInxQmuYOoc",
+          "name": "AWS (IAM) account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## AWS Archivierung",
+        "height": 80
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1232,
+        -800
+      ],
+      "typeVersion": 1,
+      "id": "a315db0e-1f8d-414c-a8f3-18237086edbd",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "Upload a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "b7ded572-5b5f-4cdf-b8a3-6e420de4ad20",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c4274ae40a4d79f47f6f6f69c27026a702cca340d2141e9b63b18db260f0078c"
+  },
+  "id": "KrdZL4jKPwCIUgqq",
+  "tags": []
+}

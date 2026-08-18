@@ -1,0 +1,315 @@
+{
+  "name": "4 Wartungsaufträge",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1152,
+        -944
+      ],
+      "id": "e66216b5-bf28-4333-8de8-56d09816d07a",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a0dfb794-c72c-4345-9040-c8d60e24b117",
+              "leftValue": "={{ $items().length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -704,
+        -928
+      ],
+      "id": "5b11b17b-f496-4394-9b9d-047b7b80ee60",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT *\nFROM prod.alarme\nWHERE schweregrad IN ('Kritisch', 'Hoch')\nAND zeitstempel >= NOW() - INTERVAL '3 hours';",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -944,
+        -928
+      ],
+      "id": "a6667ee3-7b49-499e-b247-3ce40a0d3e68",
+      "name": "Alarm Tabelle auslesen",
+      "credentials": {
+        "postgres": {
+          "id": "5eEyyLWscvqOxe7m",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const output = [];\n\nfor (const alarm of $input.all()) {\n\n    output.push({\n        json: {\n            maschinen_id: alarm.json.maschinen_id,\n            alarm_typ: alarm.json.alarm_typ,\n\n            prioritaet:\n                alarm.json.schweregrad === 'Kritisch'\n                ? 'Sofort'\n                : 'Hoch',\n\n            status: 'Offen'\n        }\n    });\n}\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -432,
+        -1040
+      ],
+      "id": "c0d05f5b-63a2-4d72-93cf-93bd40f102be",
+      "name": "bewertung & analyse der Werte"
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "value": "prod",
+          "mode": "list",
+          "cachedResultName": "prod"
+        },
+        "table": {
+          "__rl": true,
+          "value": "wartungsauftraege",
+          "mode": "list",
+          "cachedResultName": "wartungsauftraege"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {
+            "auftrag_id": 0,
+            "maschinen_id": 0
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "auftrag_id",
+              "displayName": "auftrag_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "maschinen_id",
+              "displayName": "maschinen_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "alarm_typ",
+              "displayName": "alarm_typ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "prioritaet",
+              "displayName": "prioritaet",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "erstellt_am",
+              "displayName": "erstellt_am",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -256,
+        -1040
+      ],
+      "id": "1d7b0ca2-ce8c-4ab7-9891-c47cc5876486",
+      "name": "Eintrag in Wartungsaufträge",
+      "credentials": {
+        "postgres": {
+          "id": "5eEyyLWscvqOxe7m",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "user",
+        "user": {
+          "__rl": true,
+          "value": "U0A8H6J39M2",
+          "mode": "id"
+        },
+        "text": "={{$json.slack_message}}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        96,
+        -1040
+      ],
+      "id": "647878dd-2725-492a-b012-190c55ef44b2",
+      "name": "Nachricht an Schichtleiter",
+      "webhookId": "d9095671-610b-4b8e-9fa2-4118b315a3db",
+      "credentials": {
+        "slackApi": {
+          "id": "1RKhGbnvzfpo40Lg",
+          "name": "Slack account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const auftraege = $input.all();\n\nlet msg = `🔧 *WARTUNGSAUFTRÄGE ERSTELLT*\\n\\n`;\n\nmsg += `📋 Anzahl Aufträge: ${auftraege.length}\\n\\n`;\n\nconst sofort = auftraege.filter(a => a.json.prioritaet === 'Sofort').length;\nconst hoch = auftraege.filter(a => a.json.prioritaet === 'Hoch').length;\n\nmsg += `🔴 Sofort: ${sofort}\\n`;\nmsg += `🟠 Hoch: ${hoch}\\n\\n`;\n\nfor (const a of auftraege) {\n\n    let emoji = \"🟠\";\n\n    if (a.json.prioritaet === \"Sofort\") {\n        emoji = \"🔴\";\n    }\n\n    msg += `${emoji} Maschine ${a.json.maschinen_id}\\n`;\n    msg += `   Alarm: ${a.json.alarm_typ}\\n`;\n    msg += `   Priorität: ${a.json.prioritaet}\\n`;\n    msg += `   Status: ${a.json.status}\\n\\n`;\n}\n\nmsg += `━━━━━━━━━━━━━━\\n`;\nmsg += `🤖 Automatisch durch n8n erstellt`;\n\nreturn [{\n    json: {\n        slack_message: msg\n    }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -80,
+        -1040
+      ],
+      "id": "28170822-60c0-40c6-8559-79e2e3d1044d",
+      "name": "bewertung & analyse der Werte1"
+    },
+    {
+      "parameters": {
+        "content": "## Wartungsaufträge",
+        "height": 80
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -768,
+        -1088
+      ],
+      "typeVersion": 1,
+      "id": "424bf345-b0b7-4208-bac2-954385563dcd",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Alarm Tabelle auslesen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "bewertung & analyse der Werte",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alarm Tabelle auslesen": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "bewertung & analyse der Werte": {
+      "main": [
+        [
+          {
+            "node": "Eintrag in Wartungsaufträge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Eintrag in Wartungsaufträge": {
+      "main": [
+        [
+          {
+            "node": "bewertung & analyse der Werte1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "bewertung & analyse der Werte1": {
+      "main": [
+        [
+          {
+            "node": "Nachricht an Schichtleiter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "6258aea1-f996-4624-abd1-ee06a89d9b39",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c4274ae40a4d79f47f6f6f69c27026a702cca340d2141e9b63b18db260f0078c"
+  },
+  "id": "9ofcs5we1SJohRhj",
+  "tags": []
+}

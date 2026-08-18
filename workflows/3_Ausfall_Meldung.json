@@ -1,0 +1,188 @@
+{
+  "name": "3 Ausfall Meldung",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1728,
+        -1424
+      ],
+      "id": "32a5aa3b-8e2f-429b-b437-9996ca9c23e4",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n    maschinen_id,\n    alarm_typ,\n    schweregrad,\n    COUNT(*) AS anzahl\nFROM prod.alarme\nWHERE zeitstempel >= NOW() - INTERVAL '3 hours'\nGROUP BY maschinen_id, alarm_typ, schweregrad\nORDER BY anzahl DESC\nLIMIT 10000;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1520,
+        -1424
+      ],
+      "id": "d1b18dfb-f173-49d5-acc9-807c956609ee",
+      "name": "Alarm Tabelle auslesen",
+      "credentials": {
+        "postgres": {
+          "id": "5eEyyLWscvqOxe7m",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "bb3317ab-1d62-42f5-90bd-e5fcb0277b23",
+              "leftValue": "={{$items().length}}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1312,
+        -1424
+      ],
+      "id": "071f5568-6974-4afa-a7b6-32b315179e8d",
+      "name": "Gibt es Alarme?"
+    },
+    {
+      "parameters": {
+        "jsCode": "const alarms = $input.all();\n\nlet msg = `🚨 Produktionsalarm\\n\\n`;\nmsg += `Anzahl Alarme: ${alarms.length}\\n\\n`;\n\nconst kritisch = alarms.filter(a => a.json.schweregrad === 'Kritisch').length;\nconst hoch = alarms.filter(a => a.json.schweregrad === 'Hoch').length;\nconst mittel = alarms.filter(a => a.json.schweregrad === 'Mittel').length;\n\nmsg += `🔴 Kritisch: ${kritisch}\\n`;\nmsg += `🟠 Hoch: ${hoch}\\n`;\nmsg += `🟡 Mittel: ${mittel}\\n\\n`;\n\nfor (const alarm of alarms) {\n\n    msg += `━━━━━━━━━━━━━━\\n`;\n    msg += `Maschine: ${alarm.json.maschinen_id}\\n`;\n    msg += `Alarm: ${alarm.json.alarm_typ}\\n`;\n    msg += `Schweregrad: ${alarm.json.schweregrad}\\n`;\n\n    // Nachricht nur anzeigen wenn vorhanden\n    if (alarm.json.nachricht) {\n        msg += `Info: ${alarm.json.nachricht}\\n`;\n    }\n\n    msg += `\\n`;\n}\n\nreturn [{\n    json: {\n        slack_message: msg\n    }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1088,
+        -1520
+      ],
+      "id": "a7d918ae-f002-4307-a276-3b85d30cf99c",
+      "name": "Art der Alarme"
+    },
+    {
+      "parameters": {
+        "select": "user",
+        "user": {
+          "__rl": true,
+          "value": "U0A8H6J39M2",
+          "mode": "id"
+        },
+        "text": "={{$json.slack_message}}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        -896,
+        -1520
+      ],
+      "id": "954d983b-ed95-41d7-a3ff-dffdfadd72c6",
+      "name": "Nachricht an Schichtleiter",
+      "webhookId": "7d844c95-2add-41bb-ad18-4532a52253c8",
+      "credentials": {
+        "slackApi": {
+          "id": "1RKhGbnvzfpo40Lg",
+          "name": "Slack account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Ausfall Meldung",
+        "height": 80
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1488,
+        -1568
+      ],
+      "typeVersion": 1,
+      "id": "c2574032-1c24-4b96-a9cd-5214d3461a6b",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Alarm Tabelle auslesen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alarm Tabelle auslesen": {
+      "main": [
+        [
+          {
+            "node": "Gibt es Alarme?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gibt es Alarme?": {
+      "main": [
+        [
+          {
+            "node": "Art der Alarme",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Art der Alarme": {
+      "main": [
+        [
+          {
+            "node": "Nachricht an Schichtleiter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nachricht an Schichtleiter": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "b9ddb46a-07ad-4117-a0da-316ec6459df2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c4274ae40a4d79f47f6f6f69c27026a702cca340d2141e9b63b18db260f0078c"
+  },
+  "id": "KVrgumYVRPHrN6sC",
+  "tags": []
+}

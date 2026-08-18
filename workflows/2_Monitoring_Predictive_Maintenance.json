@@ -1,0 +1,254 @@
+{
+  "name": "2 Monitoring & Predictive Maintenancee",
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ab820d5d-4899-4964-8ae2-d7bf92273e42",
+              "leftValue": "={{$items().length}}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -656,
+        -896
+      ],
+      "id": "384ebf83-aea5-4b9e-9d66-c432a08fa7b5",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT *\nFROM prod.sensorwerte\nWHERE zeitstempel >= NOW() - INTERVAL '3 hours'\nAND (\n    temperatur_c > 90\n    OR vibration_mm > 8\n    OR ausfallrisiko > 80\n);",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -864,
+        -896
+      ],
+      "id": "2cafd7aa-bfb4-4857-afcf-2f5e7b2d7b32",
+      "name": "kritische Werte",
+      "credentials": {
+        "postgres": {
+          "id": "5eEyyLWscvqOxe7m",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1056,
+        -896
+      ],
+      "id": "97619351-3acf-4edb-a980-6c0e2f30718b",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "jsCode": "const alarms = [];\n\nfor (const item of $input.all()) {\n\n    const temp = Number(item.json.temperatur_c);\n    const vibration = Number(item.json.vibration_mm);\n    const risiko = Number(item.json.ausfallrisiko);\n\n    let alarm_typ = '';\n    let schweregrad = '';\n    let nachricht = '';\n\n    if (temp > 100) {\n\n        alarm_typ = 'Temperaturalarm';\n        schweregrad = 'Kritisch';\n\n        nachricht =\n            `Maschine ${item.json.maschinen_id} überhitzt. Temperatur: ${temp}°C`;\n\n    } else if (vibration > 8) {\n\n        alarm_typ = 'Lagerschaden';\n        schweregrad = 'Hoch';\n\n        nachricht =\n            `Maschine ${item.json.maschinen_id} zeigt erhöhte Vibrationen. Vibration: ${vibration} mm`;\n\n    } else if (risiko > 90) {\n\n        alarm_typ = 'Wartung erforderlich';\n        schweregrad = 'Hoch';\n\n        nachricht =\n            `Maschine ${item.json.maschinen_id} weist ein hohes Ausfallrisiko auf. Risiko: ${risiko}%`;\n\n    } else if (temp > 85 || vibration > 6 || risiko > 75) {\n\n        alarm_typ = 'Warnung';\n        schweregrad = 'Mittel';\n\n        nachricht =\n            `Maschine ${item.json.maschinen_id} nähert sich kritischen Grenzwerten.`;\n\n    } else {\n\n        continue;\n    }\n\n    alarms.push({\n        json: {\n            zeitstempel: new Date().toISOString(),\n            maschinen_id: item.json.maschinen_id,\n            alarm_typ,\n            schweregrad,\n            nachricht\n        }\n    });\n\n}\n\nreturn alarms;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -432,
+        -912
+      ],
+      "id": "0938f2d1-957b-44bb-a064-a566faf0d724",
+      "name": "Alarm-Typ"
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "value": "prod",
+          "mode": "list",
+          "cachedResultName": "prod"
+        },
+        "table": {
+          "__rl": true,
+          "value": "alarme",
+          "mode": "list",
+          "cachedResultName": "alarme"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {
+            "alarm_id": 0,
+            "maschinen_id": 0
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "alarm_id",
+              "displayName": "alarm_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "zeitstempel",
+              "displayName": "zeitstempel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "maschinen_id",
+              "displayName": "maschinen_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "alarm_typ",
+              "displayName": "alarm_typ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "schweregrad",
+              "displayName": "schweregrad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nachricht",
+              "displayName": "nachricht",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -192,
+        -912
+      ],
+      "id": "1b2979b4-239e-4ee0-afa1-7c8e286b3b41",
+      "name": "Einpflegen in Alarm Tabelle",
+      "credentials": {
+        "postgres": {
+          "id": "5eEyyLWscvqOxe7m",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Monitoring & Predictive Maintenance",
+        "height": 80,
+        "width": 544
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -912,
+        -1024
+      ],
+      "typeVersion": 1,
+      "id": "b704a074-1af5-4a25-84e3-b28a4ffd9bf0",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "kritische Werte": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Alarm-Typ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "kritische Werte",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alarm-Typ": {
+      "main": [
+        [
+          {
+            "node": "Einpflegen in Alarm Tabelle",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "ee4f78ea-b6f7-4ca6-9dfb-2be4e47853a1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c4274ae40a4d79f47f6f6f69c27026a702cca340d2141e9b63b18db260f0078c"
+  },
+  "id": "sHpZYMizuN9wd9U2",
+  "tags": []
+}
